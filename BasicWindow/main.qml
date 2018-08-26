@@ -1,9 +1,15 @@
-import QtQuick 2.11
-import QtQuick.Window 2.11
+import Qt3D.Core 2.0
+import Qt3D.Render 2.0
+import Qt3D.Extras 2.0
 
-Window {
-    visible: true
-    width: 640
-    height: 480
-    title: qsTr("Hello World")
+Entity {
+    id: sceneRoot
+
+    components: [
+        RenderSettings {
+            activeFrameGraph: ForwardRenderer {
+                clearColor: "lightgreen"
+            }
+        }
+    ]
 }
