@@ -47,12 +47,14 @@ Entity {
 //            }
 
             GeometryRenderer {
+
+                primitiveType: GeometryRenderer.Points
                 geometry: Geometry {
                     Attribute {
                         attributeType: Attribute.VertexAttribute
                         vertexBaseType: Attribute.Float
                         vertexSize: 3
-                        count: 3
+                        count: 60
                         name: defaultPositionAttributeName
                         buffer: bezierCurveBuffer
                     }
