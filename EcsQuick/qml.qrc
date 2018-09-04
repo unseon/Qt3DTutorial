@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qt_logo_green_rgb.png</file>
+        <file>SceneEntity.qml</file>
+    </qresource>
+</RCC>
