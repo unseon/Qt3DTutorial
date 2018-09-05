@@ -20,7 +20,7 @@ Item {
     Timer {
         id: timer
 
-        interval: 100
+        interval: 1000
         repeat: true
         running: !fpsDisplayControl.hidden
         property int frames: 0
