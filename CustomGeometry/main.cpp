@@ -5,6 +5,7 @@
 #include <QGuiApplication>
 
 #include "beziercurvebuffer.h"
+#include "bezierstroke.h"
 
 int main(int argc, char* argv[])
 {
@@ -15,6 +16,9 @@ int main(int argc, char* argv[])
 
     BezierCurveBuffer buffer;
     view.engine()->qmlEngine()->rootContext()->setContextProperty("bezierCurveBuffer", &buffer);
+
+    qmlRegisterType<BezierStroke>("QtBezierStroke", 1, 0, "BezierStroke");
+
     view.setSource(QUrl("qrc:/main.qml"));
     view.show();
 
