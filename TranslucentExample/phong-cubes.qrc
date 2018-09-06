@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>CubeEntity.qml</file>
+        <file>UnlitTextureAlphaMaterial.qml</file>
+        <file>UnlitTextureAlphaShaders.js</file>
+        <file>BackToFrontRenderer.qml</file>
+        <file>Cubes.qml</file>
+        <file>SceneView.qml</file>
+        <file>up_wallpaper.jpg</file>
+        <file>no_alpha.png</file>
+        <file>heart.svg</file>
+    </qresource>
+</RCC>

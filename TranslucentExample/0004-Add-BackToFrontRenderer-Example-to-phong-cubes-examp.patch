@@ -1,0 +1,350 @@
+From 0085a7520052d2ffca2a4b02a433ab51369e994d Mon Sep 17 00:00:00 2001
+From: Andy Nichols <nezticle@gmail.com>
+Date: Mon, 23 Jul 2018 10:27:32 +0200
+Subject: [PATCH] Add BackToFrontRenderer Example to phong-cubes example
+
+Change-Id: I9d1e58180ef540ecf9203ad3005b5f3ebe8feafb
+---
+ examples/qt3d/phong-cubes/BackToFrontRenderer.qml |  64 ++++++++++++
+ examples/qt3d/phong-cubes/Cubes.qml               | 108 ++++++++++++++++++++
+ examples/qt3d/phong-cubes/main.qml                | 115 ++++------------------
+ examples/qt3d/phong-cubes/phong-cubes.qrc         |   2 +
+ 4 files changed, 192 insertions(+), 97 deletions(-)
+ create mode 100644 examples/qt3d/phong-cubes/BackToFrontRenderer.qml
+ create mode 100644 examples/qt3d/phong-cubes/Cubes.qml
+
+diff --git a/examples/qt3d/phong-cubes/BackToFrontRenderer.qml b/examples/qt3d/phong-cubes/BackToFrontRenderer.qml
+new file mode 100644
+index 000000000..389b56b7b
+--- /dev/null
++++ b/examples/qt3d/phong-cubes/BackToFrontRenderer.qml
+@@ -0,0 +1,64 @@
++import Qt3D.Core 2.0
++import Qt3D.Render 2.10
++
++TechniqueFilter {
++    id: techniqueFilter
++
++    property alias surface: renderSurfaceSelector.surface
++    property alias viewportRect: viewport.normalizedRect
++    property alias clearColor: clearBuffers.clearColor
++    property alias camera: cameraSelector.camera
++    property alias externalRenderTargetSize: renderSurfaceSelector.externalRenderTargetSize
++    property alias frustumCulling: frustumCulling.enabled
++    property alias gamma: viewport.gamma
++
++    matchAll: [
++        FilterKey {
++            name: "renderingStyle"
++            value: "forward"
++        }
++    ]
++
++    RenderSurfaceSelector {
++        id: renderSurfaceSelector
++
++        Viewport {
++            id: viewport
++            normalizedRect: Qt.rect(0.0, 0.0, 1.0, 1.0)
++
++            CameraSelector {
++                id: cameraSelector
++
++                ClearBuffers {
++                    id: clearBuffers
++                    clearColor: Qt.rgba(1.0, 1.0, 1.0, 1.0)
++                    buffers: ClearBuffers.ColorBuffer
++
++                    FrustumCulling {
++                        id: frustumCulling
++
++                        RenderStateSet {
++                            id: renderStateSet
++                            renderStates: [
++                                NoDepthMask {
++                                    // Disable Depth Test
++                                },
++                                CullFace {
++                                    // Only Render Front faces (needed when you disable depth test)
++                                    mode: CullFace.Back
++                                }
++
++                            ]
++
++                            SortPolicy {
++                                id: sortPolicy
++                                // Always render back to front
++                                sortTypes: [SortPolicy.BackToFront]
++                            }
++                        }
++                    }
++                }
++            }
++        }
++    }
++}
+diff --git a/examples/qt3d/phong-cubes/Cubes.qml b/examples/qt3d/phong-cubes/Cubes.qml
+new file mode 100644
+index 000000000..6c7ab14d7
+--- /dev/null
++++ b/examples/qt3d/phong-cubes/Cubes.qml
+@@ -0,0 +1,108 @@
++import Qt3D.Core 2.0
++import Qt3D.Render 2.0
++import QtQuick 2.0
++import Qt3D.Extras 2.10
++
++Entity {
++    CubeEntity {
++        position: Qt.vector3d(-1, 1, 0)
++        material: DiffuseSpecularMaterial {}
++    }
++
++    CubeEntity {
++        position: Qt.vector3d(0, 1, 0)
++        material: DiffuseSpecularAlphaMaterial {
++            id: materialWithAlpha
++            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
++            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
++
++            NumberAnimation {
++                target: materialWithAlpha
++                property: "alpha"
++                duration: 10000
++                easing.type: Easing.InOutQuad
++                from: 0.0
++                to: 1.0
++                running: true
++                loops: Animation.Infinite
++            }
++        }
++
++
++    }
++
++    CubeEntity {
++        position: Qt.vector3d(1, 1, 0)
++        material: DiffuseSpecularMaterial {
++            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
++            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
++        }
++    }
++
++    CubeEntity {
++        id: cube7
++        position: Qt.vector3d(-1, 0, 0)
++        property real alpha: 1.0
++
++        NumberAnimation {
++            target: cube7
++            property: "alpha"
++            duration: 10000
++            easing.type: Easing.InOutQuad
++            from: 0.0
++            to: 1.0
++            running: true
++            loops: Animation.Infinite
++        }
++
++        material: DiffuseSpecularMaterial {
++            id: diffuseSpecular
++            alphaBlending: true
++            diffuse: Qt.rgba(0.7, 0.7, 0.7, cube7.alpha)
++        }
++    }
++
++    CubeEntity {
++        position: Qt.vector3d(0, 0, 0)
++        material: DiffuseSpecularMaterial {
++            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
++            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
++        }
++    }
++
++    CubeEntity {
++        position: Qt.vector3d(1, 0, 0)
++        material: DiffuseSpecularMaterial {
++            alphaBlending: true
++            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
++            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
++        }
++    }
++
++    CubeEntity {
++        position: Qt.vector3d(-1, -1, 0)
++        material: DiffuseSpecularMaterial {
++            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
++            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
++            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
++        }
++    }
++
++    CubeEntity {
++        position: Qt.vector3d(0, -1, 0)
++        material: DiffuseSpecularMaterial {
++            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
++            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
++            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
++        }
++    }
++
++    CubeEntity {
++        position: Qt.vector3d(1, -1, 0)
++        material: DiffuseSpecularMaterial {
++            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
++            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
++            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
++        }
++    }
++}
+diff --git a/examples/qt3d/phong-cubes/main.qml b/examples/qt3d/phong-cubes/main.qml
+index ccea396df..2432a5c9a 100644
+--- a/examples/qt3d/phong-cubes/main.qml
++++ b/examples/qt3d/phong-cubes/main.qml
+@@ -57,7 +57,7 @@ import QtQuick 2.0
+ Entity {
+     components: [
+         RenderSettings {
+-            activeFrameGraph: ForwardRenderer {
++            activeFrameGraph: BackToFrontRenderer {
+                 clearColor: "white"
+                 camera: mainCamera
+             }
+@@ -83,105 +83,26 @@ Entity {
+         ]
+     }
+ 
+-    CubeEntity {
+-        position: Qt.vector3d(-1, 1, 0)
+-        material: DiffuseSpecularMaterial {}
+-    }
+-
+-    CubeEntity {
+-        position: Qt.vector3d(0, 1, 0)
+-        material: DiffuseSpecularAlphaMaterial {
+-            id: materialWithAlpha
+-            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
+-            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
+-
+-            NumberAnimation {
+-                target: materialWithAlpha
+-                property: "alpha"
+-                duration: 10000
+-                easing.type: Easing.InOutQuad
+-                from: 0.0
+-                to: 1.0
+-                running: true
+-                loops: Animation.Infinite
++    Cubes {
++        components: [
++            Transform {
++                translation: Qt.vector3d(0.0, 0.0, 0.0);
+             }
+-        }
+-
+-
+-    }
+-
+-    CubeEntity {
+-        position: Qt.vector3d(1, 1, 0)
+-        material: DiffuseSpecularMaterial {
+-            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
+-            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
+-        }
+-    }
+-
+-    CubeEntity {
+-        id: cube7
+-        position: Qt.vector3d(-1, 0, 0)
+-        property real alpha: 1.0
+-
+-        NumberAnimation {
+-            target: cube7
+-            property: "alpha"
+-            duration: 10000
+-            easing.type: Easing.InOutQuad
+-            from: 0.0
+-            to: 1.0
+-            running: true
+-            loops: Animation.Infinite
+-        }
+-
+-        material: DiffuseSpecularMaterial {
+-            id: diffuseSpecular
+-            alphaBlending: true
+-            diffuse: Qt.rgba(0.7, 0.7, 0.7, cube7.alpha)
+-        }
+-    }
+-
+-    CubeEntity {
+-        position: Qt.vector3d(0, 0, 0)
+-        material: DiffuseSpecularMaterial {
+-            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
+-            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
+-        }
+-    }
+-
+-    CubeEntity {
+-        position: Qt.vector3d(1, 0, 0)
+-        material: DiffuseSpecularMaterial {
+-            alphaBlending: true
+-            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
+-            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
+-        }
++        ]
+     }
+-
+-    CubeEntity {
+-        position: Qt.vector3d(-1, -1, 0)
+-        material: DiffuseSpecularMaterial {
+-            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
+-            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
+-            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
+-        }
++    Cubes {
++        components: [
++            Transform {
++                translation: Qt.vector3d(0.0, 0.0, 1.0);
++            }
++        ]
+     }
+-
+-    CubeEntity {
+-        position: Qt.vector3d(0, -1, 0)
+-        material: DiffuseSpecularMaterial {
+-            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
+-            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
+-            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
+-        }
++    Cubes {
++        components: [
++            Transform {
++                translation: Qt.vector3d(0.0, 0.0, -1.0);
++            }
++        ]
+     }
+ 
+-    CubeEntity {
+-        position: Qt.vector3d(1, -1, 0)
+-        material: DiffuseSpecularMaterial {
+-            normal: TextureLoader { source: "qrc:/assets/textures/pattern_09/normal.webp" }
+-            diffuse: TextureLoader { source: "qrc:/assets/textures/pattern_09/diffuse.webp" }
+-            specular: TextureLoader { source: "qrc:/assets/textures/pattern_09/specular.webp" }
+-        }
+-    }
+ }
+diff --git a/examples/qt3d/phong-cubes/phong-cubes.qrc b/examples/qt3d/phong-cubes/phong-cubes.qrc
+index 9db138f4e..5f5111e30 100644
+--- a/examples/qt3d/phong-cubes/phong-cubes.qrc
++++ b/examples/qt3d/phong-cubes/phong-cubes.qrc
+@@ -4,5 +4,7 @@
+         <file>CubeEntity.qml</file>
+         <file>DiffuseSpecularAlphaMaterial.qml</file>
+         <file>DiffuseSpecularAlphaShaders.js</file>
++        <file>BackToFrontRenderer.qml</file>
++        <file>Cubes.qml</file>
+     </qresource>
+ </RCC>
+-- 
+2.12.2.windows.1
+
