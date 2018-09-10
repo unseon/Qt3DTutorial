@@ -60,11 +60,13 @@ Entity {
                 x: 0.0
                 y: 10.0
                 z: 0.0
+                myColor: "red"
             }
             ListElement {
                 x: 0.0
                 y: 30.0
                 z: 0.0
+                myColor: "#AADDAA"
             }
         }
 
@@ -89,7 +91,13 @@ Entity {
                     scale: 1.0
                 }
 
-            components: [transform, instantiator.geometry, instantiator.material]
+            property var material:
+                PhongMaterial {
+                    ambient: "#222222"
+                    diffuse: model.myColor
+                }
+
+            components: [transform, instantiator.geometry, material]
         }
     }
 
