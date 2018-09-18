@@ -4,5 +4,7 @@
         <file>Content3D.qml</file>
         <file>Gear_scene.dae</file>
         <file>toyplane.obj</file>
+        <file>arrow_X2.fbx</file>
+        <file>arrow.fbx</file>
     </qresource>
 </RCC>

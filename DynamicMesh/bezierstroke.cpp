@@ -10,7 +10,8 @@ BezierStroke::BezierStroke(Qt3DCore::QNode *parent)
       m_resolutionX(21),
       m_resolutionZ(21),
       m_width(0.5f),
-      m_geometry(nullptr)
+      m_geometry(nullptr),
+      m_vertexArray(nullptr)
 {
     updateComponents();
 }
@@ -92,6 +93,7 @@ void BezierStroke::updateComponents()
         delete m_vertexBuffer;
         delete m_vertexAttribute;
         delete m_indexBuffer;
+        delete[] m_vertexArray;
     }
 
     int vertCount = m_resolutionX * m_resolutionZ;
@@ -99,6 +101,11 @@ void BezierStroke::updateComponents()
 
     m_geometry = new Qt3DRender::QGeometry();
     m_vertexBuffer = new Qt3DRender::QBuffer();
+    m_vertexArray = new float[vertCount * 3];
+    m_vertexByteArray.setRawData(reinterpret_cast<char *>(m_vertexArray), vertCount * 3 * sizeof(float));
+    //m_vertexBuffer->data().setRawData(reinterpret_cast<char *>(m_vertexArray), vertCount * 3 * sizeof(float));
+    m_vertexBuffer->setData(m_vertexByteArray);
+
     updateVertexPositions();
 
     m_vertexAttribute = new Qt3DRender::QAttribute();
@@ -209,22 +216,9 @@ void BezierStroke::updateComponents()
 
 void BezierStroke::updateVertexPositions()
 {
+    qDebug() << "updateVertexPositions()";
+
     int vertCount = m_resolutionX * m_resolutionZ;
-
-
-    // position
-    QByteArray positions = m_vertexBuffer->data();
-    if (positions.isNull()) {
-        qDebug() << (positions == m_vertexBuffer->data());
-        qDebug() << "resize position buffer";
-        positions.resize(vertCount * 3 * sizeof(float));
-
-        qDebug() << (positions == m_vertexBuffer->data());
-
-        qDebug() << m_vertexBuffer->data().size() << positions.size();
-    }
-
-    float *posData = reinterpret_cast<float *>(positions.data());
 
     if (m_resolutionX > 0 && m_resolutionZ > 1) {
         for (int ix = 0; ix < m_resolutionX; ix++) {
@@ -234,14 +228,19 @@ void BezierStroke::updateVertexPositions()
             for (int iz = 0; iz < m_resolutionZ; iz++) {
                 float t = float(iz) / (m_resolutionZ - 1);
                 QVector3D vec = calcCubicOffset(t, offsetX, m_p0, m_p1, m_p2, m_p3);
-                posData[offsetIdx + iz * 3] = vec.x();
-                posData[offsetIdx + iz * 3 + 1] = vec.y();
-                posData[offsetIdx + iz * 3 + 2] = vec.z();
+                m_vertexArray[offsetIdx + iz * 3] = vec.x();
+                m_vertexArray[offsetIdx + iz * 3 + 1] = vec.y();
+                m_vertexArray[offsetIdx + iz * 3 + 2] = vec.z();
             }
         }
     }
 
-    m_vertexBuffer->setData(positions);
+    //m_vertexBuffer->data().setRawData(reinterpret_cast<char *>(m_vertexArray), vertCount * 3 * sizeof(float));
+
+    //m_vertexByteArray = QByteArray::fromRawData(reinterpret_cast<char *>(m_vertexArray), vertCount * 3 * sizeof(float));
+    m_vertexByteArray = QByteArray(reinterpret_cast<char *>(m_vertexArray), vertCount * 3 * sizeof(float));
+    m_vertexBuffer->setData(m_vertexByteArray);
+
 }
 
 QVector3D BezierStroke::calcCubicPosition(float t, QVector3D p0, QVector3D p1, QVector3D p2, QVector3D p3)

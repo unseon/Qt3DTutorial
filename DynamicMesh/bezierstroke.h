@@ -71,6 +71,8 @@ private:
 
     Qt3DRender::QAttribute *m_vertexAttribute;
     Qt3DRender::QBuffer *m_vertexBuffer;
+    QByteArray m_vertexByteArray;
+    float* m_vertexArray;
 
     Qt3DRender::QAttribute *m_uvAttribute;
     Qt3DRender::QBuffer *m_uvBuffer;
@@ -86,6 +88,8 @@ private:
     unsigned int m_resolutionX;
     unsigned int m_resolutionZ;
     qreal m_width;
+
+
 };
 
 

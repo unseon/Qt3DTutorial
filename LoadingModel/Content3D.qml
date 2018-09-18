@@ -39,7 +39,7 @@ Entity {
         aspectRatio: 1.0 / 1.0
         nearPlane : 0.1
         farPlane : 1000.0
-        position: Qt.vector3d( 100.0, 100.0, 100.0 )
+        position: Qt.vector3d( 0.0, 100.0, 100.0 )
         upVector: Qt.vector3d( 0.0, 1.0, 0.0 )
         viewCenter: Qt.vector3d( 0.0, 0.0, 0.0 )
     }
@@ -61,6 +61,29 @@ Entity {
             },
             SceneLoader { // SceneLoader is available only when included in componens
                 source: "qrc:/Gear_scene.dae"
+            }
+        ]
+    }
+
+    Entity {
+        id: fbxLoader
+
+        components: [
+            Transform {
+                translation: Qt.vector3d(30.0, 10.0, 0.0)
+                scale: 0.125
+            },
+            SceneLoader { // SceneLoader is available only when included in componens
+                source: "qrc:/arrow.fbx"
+                onStatusChanged: {
+                    if (status === SceneLoader.Ready) {
+                        console.log("loaded")
+                    } else if (status === SceneLoader.Error) {
+                        console.log("unable to load model");
+                    }
+                }
+
+                async: false
             }
         ]
     }
